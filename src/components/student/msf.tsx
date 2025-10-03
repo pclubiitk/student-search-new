@@ -1,7 +1,7 @@
 import {InputLabel, Select, MenuItem, FormControl} from "@mui/material";
 import React, {useCallback} from "react";
-import debounce from "./debounce";
-import {Query} from "./commontypes";
+import debounce from "@/components/ui/animations/debounce";
+import {Query} from "@/lib/types/data";
 
 interface MSFProps {
 	query: Query;

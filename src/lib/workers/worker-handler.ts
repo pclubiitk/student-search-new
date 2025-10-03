@@ -1,5 +1,5 @@
-import { Student, Query, Options } from "./commontypes";
-import { rollToYear, check_bacchas, check_query } from "./query-processor";
+import { Student, Query, Options } from "@/lib/types/data";
+import { rollToYear, check_bacchas, check_query } from "@/lib/data/query-processor";
 
 function prepare_worker(students: Student[], options: Options): void {
 	//student data should be in a global variable called "students", and there should be a global variable "options" to take the list of options for everything

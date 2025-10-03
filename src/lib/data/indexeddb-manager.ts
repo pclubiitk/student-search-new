@@ -1,4 +1,4 @@
-import { Student } from "./commontypes";
+import { Student } from "@/lib/types/data";
 
 let db: IDBDatabase | undefined = undefined; // holds the reference to the IndexedDB storing student data locally
 

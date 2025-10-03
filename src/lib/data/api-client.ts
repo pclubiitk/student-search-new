@@ -1,4 +1,4 @@
-import { Student } from "./commontypes";
+import { Student } from "@/lib/types/data";
 
 const config = {
     APP_ID: "data-rgzxa",

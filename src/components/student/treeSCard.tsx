@@ -1,7 +1,7 @@
 import React from "react";
-import SCard from "../components/SCard";
+import SCard from "@/components/ui/SCard";
 import Card from "@mui/material/Card";
-import { Student } from "./commontypes";
+import { Student } from "@/lib/types/data";
 
 interface TreeCardProps {
 	baapu?: Student;

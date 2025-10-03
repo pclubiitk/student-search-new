@@ -1,4 +1,4 @@
-import { Student, Query } from "./commontypes";
+import { Student, Query } from "@/lib/types/data";
 
 type StudentKey = "g"|"n"|"h"|"p"|"d"|"b"|"a";
 

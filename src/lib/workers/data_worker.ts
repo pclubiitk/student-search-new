@@ -1,7 +1,7 @@
-import { Student, Options } from "./commontypes";
-import { fetch_student_data } from "./api-client";
-import { get_time_IDB, update_IDB, check_IDB } from "./indexeddb-manager";
-import { prepare_worker } from "./worker-handler";
+import { Student, Options } from "@/lib/types/data";
+import { fetch_student_data } from "@/lib/data/api-client";
+import { get_time_IDB, update_IDB, check_IDB } from "@/lib/data/indexeddb-manager";
+import { prepare_worker } from "@/lib/workers/worker-handler";
 
 let students: Student[] = [];
 let new_students: Student[] | undefined = undefined;

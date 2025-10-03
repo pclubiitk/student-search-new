@@ -1,6 +1,6 @@
-import Options from "../components/Options";
-import Display from "../components/Display";
-import Overlay from "../components/Overlay";
+import Options from "@/components/ui/Options";
+import Display from "@/components/ui/Display";
+import Overlay from "@/components/ui/Overlay";
 import ReactDOM from 'react-dom/client';
 import React, {useState, useEffect, useRef} from "react";
 import {ThemeProvider,createTheme} from "@mui/material/styles";
@@ -10,10 +10,10 @@ import Card from "@mui/material/Card";
 import Button from "@mui/material/Button";
 import {DarkModeSharp, LightModeRounded, HelpOutlineRounded, MailOutlineRounded} from "@mui/icons-material";
 // import {students as STUDENTS, rollToYear} from "../components/student_data_getter.tsx";
-import TreeCard from "../components/treeSCard";
-import SCard from "../components/SCard";
-import {Student as StudentType, Query as QueryType, Options as OptType} from "../components/commontypes";
-import GuestFooter from "../components/Treefooter";
+import TreeCard from "@/components/student/treeSCard";
+import SCard from "@/components/ui/SCard";
+import {Student as StudentType, Query as QueryType, Options as OptType} from "@/lib/types/data";
+import GuestFooter from "@/components/student/Treefooter";
 
 //start shared search worker
 if (!(typeof window === "undefined") && window.Worker) {//only on the client, TODO: find better method - do when dealing w/ SSG

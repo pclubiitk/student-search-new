@@ -1,7 +1,7 @@
 import Avatar from "@mui/material/Avatar";
 
-import Male from "./GenericMale.png";
-import Female from "./GenericFemale.png";
+import Male from "@/components/assets/GenericMale.png";
+import Female from "@/components/assets/GenericFemale.png";
 
 interface ImageProps {
 	style: Object;
