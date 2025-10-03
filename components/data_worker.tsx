@@ -1,6 +1,6 @@
 // import students from "@/pages/api/data.json";
 import {Student, Query, Options} from  "./commontypes";
-
+import Fuse from "fuse.js";
 var students: any[] = []
 var new_students: any[] | undefined = undefined;
 var config = {
@@ -365,8 +365,30 @@ function check_bacchas(bacchas: "Not Available" | Array<string>) : Array<Student
 
 function check_query(query: Query) : Array<Student> {
 	//goes through the array of students and selects only those that match the query given.
+	// filtering first on the basis of name
+	let filtered_student = students; // currently unfilitered
 
-	return students.filter((student: Student) => {
+	//applying fuzzy search on the basis of name
+	if (query.name) {
+        const fuse = new Fuse(students, {
+            keys: ["n"],  
+            threshold: 0.2,         
+        });
+        filtered_student= fuse.search(query.name).map(res => res.item);
+		//above first only checked fuzziness on name, but user might have entered the roll no which wont be in fuzzy of name, so adding the roll no and username 
+
+		const lowercased_name = query.name.toLowerCase();
+		filtered_student = filtered_student.concat(
+            students.filter(s =>
+                s.i.toLowerCase().includes(lowercased_name) || // roll number
+                s.u.toLowerCase().startsWith(lowercased_name)  // username
+            )
+        );
+		//above snippet checks if the students include roll no or starts with username and adds it to the filtered array 
+        
+        filtered_student = Array.from(new Set(filtered_student)); // removing duplicates by creating a set and then back to array
+    }
+	return filtered_student.filter((student: Student) => {
 		let key: keyof Query;
 		let entry = false;
 		for (key in query) {
@@ -377,56 +399,57 @@ function check_query(query: Query) : Array<Student> {
 			}
 			entry = true; //if query is not totally empty, entry is set to true
 			if (key === "name") {
-				// special processing for the "name" field
-				// we can't match the name to the student's username or roll number right now because it could still match their real name - so we can't just immediately put "return false" if it doesn't match, and we can't just put "return true" if it does match because the student may not match the criteria in other fields.
-				// so, we have to check this at the end.
-				// so, we check if the name matches the student's full name first.
+				// //continue;
+				// // special processing for the "name" field
+				// // we can't match the name to the student's username or roll number right now because it could still match their real name - so we can't just immediately put "return false" if it doesn't match, and we can't just put "return true" if it does match because the student may not match the criteria in other fields.
+				// // so, we have to check this at the end.
+				// // so, we check if the name matches the student's full name first.
 				
-				let partsOfQueryName = query.name.toLowerCase().split(/\s+/);
-				let lastPartOfQN: string = partsOfQueryName.pop()!;
-				let partsOfStudentName = student.n.toLowerCase().split(/\s+/)
-				let test1 = true;
+				// let partsOfQueryName = query.name.toLowerCase().split(/\s+/);
+				// let lastPartOfQN: string = partsOfQueryName.pop()!;
+				// let partsOfStudentName = student.n.toLowerCase().split(/\s+/)
+				// let test1 = true;
 				
-				// each part of the name in the query must match to exactly one part of the name of the student, and vice versa
-				// so, we go through each part in partsOfQueryName, and we go through each part in partsOfStudentName - if they match, we remove that part in partsOfStudentName, and we move on
-				// if a part in partsOfQueryName DOESN't match any part of the student's name, we leave the for loop, and go on to check if the name in the query matches the student's username or roll number
+				// // each part of the name in the query must match to exactly one part of the name of the student, and vice versa
+				// // so, we go through each part in partsOfQueryName, and we go through each part in partsOfStudentName - if they match, we remove that part in partsOfStudentName, and we move on
+				// // if a part in partsOfQueryName DOESN't match any part of the student's name, we leave the for loop, and go on to check if the name in the query matches the student's username or roll number
 				
-				for (const queryPart of partsOfQueryName) {
-					let test2 = false;
-					for (const studentPart of partsOfStudentName) {
-						if (studentPart === queryPart) {
-							let index = partsOfStudentName.indexOf(studentPart);
-							partsOfStudentName.splice(index,1);
-							test2 = true; //found a match for this part, so let's exit the loop so we can move onto the next part
-							break;
-						}
-					}
-					if (!test2) {//if we went through the all partsOfStudentName without finding a match, stop checking for these parts and move straight to checking username/roll number.
-						test1 = false;
-						break;
-					}
-				}
+				// for (const queryPart of partsOfQueryName) {
+				// 	let test2 = false;
+				// 	for (const studentPart of partsOfStudentName) {
+				// 		if (studentPart === queryPart) {
+				// 			let index = partsOfStudentName.indexOf(studentPart);
+				// 			partsOfStudentName.splice(index,1);
+				// 			test2 = true; //found a match for this part, so let's exit the loop so we can move onto the next part
+				// 			break;
+				// 		}
+				// 	}
+				// 	if (!test2) {//if we went through the all partsOfStudentName without finding a match, stop checking for these parts and move straight to checking username/roll number.
+				// 		test1 = false;
+				// 		break;
+				// 	}
+				// }
 				
-				if (test1) {
-					// if test1 is not yet false, this means that all other parts of the name entered have matched with a part in the student's name.
-					// all that's left is to check the final part of the student name - which can be incomplete, so we use startsWith instead of equals.
-					let test2 = false;
-					for (const part of partsOfStudentName) {
-						if (part.startsWith(lastPartOfQN)) {
-							test2 = true;
-							break;
-						}
-					}
-					if (!test2) {
-						test1 = false;
-					}
-				}
+				// if (test1) {
+				// 	// if test1 is not yet false, this means that all other parts of the name entered have matched with a part in the student's name.
+				// 	// all that's left is to check the final part of the student name - which can be incomplete, so we use startsWith instead of equals.
+				// 	let test2 = false;
+				// 	for (const part of partsOfStudentName) {
+				// 		if (part.startsWith(lastPartOfQN)) {
+				// 			test2 = true;
+				// 			break;
+				// 		}
+				// 	}
+				// 	if (!test2) {
+				// 		test1 = false;
+				// 	}
+				// }
 				
-				//now that we've checked the name completely, we just need to check if the queried name matches the username/roll number if it hasn't matched the name.
-				if (!test1) {
-					let lowercased_name = query.name.toLowerCase();
-					if (!(student.i.includes(lowercased_name)) && !(student.u.startsWith(lowercased_name))) return false;
-				} //if the name doesn't match EITHER, then we discard that student's record.
+				// //now that we've checked the name completely, we just need to check if the queried name matches the username/roll number if it hasn't matched the name.
+				// if (!test1) {
+				// 	let lowercased_name = query.name.toLowerCase();
+				// 	if (!(student.i.includes(lowercased_name)) && !(student.u.startsWith(lowercased_name))) return false;
+				// } //if the name doesn't match EITHER, then we discard that student's record.
 			} else if (key === "batch") {
 				// special processing for the "batch"/"year" field
 				if (!(query.batch.includes(rollToYear(student.i)))) return false;
