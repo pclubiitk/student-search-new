@@ -15,6 +15,23 @@ export interface Student {
 	c: Array<string> | string; //array containing roll numbers of bacchas (or the words "not available")
 }
 
+// export interface Student {
+// 	address: string; 	// a
+// 	bloodgrp: string; 	// b
+// 	dept: string;  		// d
+// 	gender: string; 	// g
+// 	hall: string;  		// h 
+// 	rollno: string;  	// i
+// 	name: string;  		// n
+// 	prog: string;  		// p 
+// 	roomno: string;  	// r
+// 	username: string; 	// u
+// 	sg_rollno: string;  // s
+// 	bc_rollnos: Array<string> | string; // c 
+// }
+
+
+
 export interface Query {
 	gender: string;
 	name: string;
