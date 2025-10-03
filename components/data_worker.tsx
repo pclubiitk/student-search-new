@@ -240,6 +240,43 @@ async function check_IDB() {
 	})
 }
 
+async function applyChangelog(resp: { add: Student[]; delete: string[] }) {
+	try {
+		await start_IDB();
+		let trxn = db.transaction(["students"], "readwrite");
+		let store = trxn.objectStore("students");
+
+		let req = store.get(1);
+		req.onsuccess = () => {
+			let current = req.result?.students || [];
+
+			// add/update
+			for (const st of resp.add) {
+				// replace if exists, else push
+				const idx = current.findIndex((s: Student) => s.i === st.i);
+				if (idx >= 0) current[idx] = st;
+				else current.push(st);
+			}
+
+			// delete
+			current = current.filter((s: Student) => !resp.delete.includes(s.i));
+
+			store.put({ students: current, key: 1 });
+			store.put({ time: Date.now(), key: 2 });
+
+			students = current;
+			prepare_worker();
+		};
+	} catch (err) {
+		console.error("Failed applying changelog:", err);
+	}
+}
+async function fetch_changelog(lastTime: number) {
+	const resp = await fetch(`/changelog?lastTime=${lastTime}`).then(r => r.json());
+	await applyChangelog(resp);
+}
+
+
 function prepare_worker() {//student data should be in a global variable called "students", and there should be a global variable "options" to take the list of options for everything
 //after filling the "options" variable, send "Worker ready" message and set up onmessage handler
 //	console.log("prepare_worker() logging students:");
@@ -310,29 +347,29 @@ function prepare_worker() {//student data should be in a global variable called 
 		console.error(error);
 		noLocalData = true;
 	}
-	if (noLocalData || Date.now() - time > 1000*60*60*24*7) {
-	//update data every week
+	if (noLocalData || Date.now() - time > 1000*60*60*24*30) {
+	// No local data, force full fetch
+	try {
+		console.log("Fetching full data from API...");
+		new_students = await fetch_student_data();
+		if (!new_students) throw new Error("Failed to fetch student data");
+		await update_IDB(new_students);
+		students = new_students;
+		prepare_worker();
+	} catch (err) {
+		console.error("Failed to fetch data from API and update local DB", err);
+		cantGetData = true;
+	}
+	}
+	else {
+	// Local data is recent, fetch changelog
 		try {
-			console.log("Fetching data from API...");
-			new_students = await fetch_student_data();
-			if (new_students == undefined) {
-				throw new Error("Failed to fetch student data from DB")
-			}
-			console.log("Updating local DB with API data...");
-			update_IDB(new_students);
-		} catch (error) {
-			console.error("Failed to fetch data from API and update local DB");
-			console.error(error);
-			cantGetData = true;
-		}
-		if (new_students != undefined) {
-			console.log("New data was fetched, so re-preparing worker...");
-			students = new_students;
-			prepare_worker();
-		} else {
-			console.log("Failed to fetch new data, so worker was not re-prepared.");
+			await fetch_changelog(time);
+		} catch (err) {
+			console.error("Failed fetching changelog: ", err);
 		}
 	}
+
 	
 	if (noLocalData && cantGetData) {
 		postMessage("Error");
