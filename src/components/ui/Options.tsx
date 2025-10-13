@@ -1,10 +1,10 @@
 import React, {useState, useCallback, useEffect, forwardRef} from "react";
 import {Grid, InputLabel, TextField, Select, MenuItem, Paper, FormControl, InputAdornment, IconButton} from "@mui/material"
 import {ClearRounded} from "@mui/icons-material"
-import MultiSelectField from "./msf";
+import MultiSelectField from "@/components/student/msf";
 // import {data as listOpts} from "../components/student_data_getter.tsx";
-import debounce from "./debounce"
-import {Student, Query, Options as OptionsType} from "./commontypes"
+import debounce from "@/components/ui/animations/debounce"
+import {Query, Options as OptionsType} from "@/lib/types/data"
 
 /* options to include:
 Year

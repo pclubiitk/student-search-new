@@ -5,8 +5,9 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start -p 3003",
-    "lint": "next lint"
+    "start": "next start -p 3000",
+    "lint": "next lint",
+    "build:worker": "webpack --config webpack.worker.config.js"
   },
   "dependencies": {
     "@emotion/react": "^11.10.6",
@@ -19,11 +20,17 @@
     "@types/sharedworker": "^0.0.91",
     "eslint": "8.34.0",
     "eslint-config-next": "13.2.1",
-    "next": "13.2.1",
+    "next": "^15.5.4",
     "next-pwa": "^5.6.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-transition-group": "^4.4.5",
     "typescript": "4.9.5"
+  },
+  "devDependencies": {
+    "dotenv": "^17.2.3",
+    "ts-loader": "^9.5.4",
+    "webpack": "^5.102.1",
+    "webpack-cli": "^6.0.1"
   }
 }
