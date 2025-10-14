@@ -1,12 +1,14 @@
 import { Student, Options } from "@/lib/types/data";
-import { fetch_student_data } from "@/lib/data/api-client";
+import { fetch_student_data, fetch_changelog } from "@/lib/data/api-client";
 import {
   get_time_IDB,
   update_IDB,
   check_IDB,
+  apply_Changelog,
 } from "@/lib/data/indexeddb-manager";
-import { prepare_worker } from "@/lib/workers/worker-handler";
+import { prepare_worker } from "@/lib/workers/prepare_worker";
 import { check_bacchas, check_query } from "@/lib/data/query-processor";
+import { Timestamp } from "next/dist/server/lib/cache-handlers/types";
 
 let students: Student[] = [];
 let new_students: Student[] | undefined = undefined;
@@ -52,51 +54,56 @@ self.onmessage = async (event: MessageEvent) => {
 };
 
 async function initializeData(): Promise<void> {
-  let noLocalData = false;
+  let noLastTimeStamp = false;
   let cantGetData = false;
-  let time = 0;
+  let time: number = 0;
   try {
-    console.log("Grabbing data locally...");
-    students = await check_IDB();
     time = await get_time_IDB();
-    console.log("Most recent data retrieval occurred on:");
-    console.log(time);
-    console.log("Preparing worker using local data...");
-    prepare_worker(students, options);
   } catch (error) {
-    console.error("Failed to find data locally");
-    console.error(error);
-    noLocalData = true;
+    console.error("Failed to find last timestamp");
+    noLastTimeStamp = true;
   }
-  if (noLocalData || Date.now() - time > 1000 * 60 * 60 * 24 * 7) {
-    //update data every week
+  console.log("time:", Date.now(), time, Date.now() - time);
+  if (noLastTimeStamp || Date.now() - time > 1000 * 60 * 60 * 24 * 30) {
     try {
       console.log("Fetching data from API...");
       const res = await fetch_student_data();
       if (res === null) {
         throw new Error("Failed to fetch student data from DB");
       } else new_students = res;
-      console.log("Updating local DB with API data...");
+      // console.log("Updating local DB with API data...");
       await update_IDB(new_students);
     } catch (error) {
-      console.error("Failed to fetch data from API and update local DB");
       console.error(error);
       cantGetData = true;
     }
     if (new_students !== undefined) {
       console.log("New data was fetched, so re-preparing worker...");
       students = new_students;
-      prepare_worker(students, options);
     } else {
       console.log("Failed to fetch new data, so worker was not re-prepared.");
     }
+  } else {
+    try {
+      console.log("Fetching changelog from API...");
+      const res = await fetch_changelog(time);
+      if (res === null) {
+        throw new Error("Failed to fetch change log");
+      }
+      students = await apply_Changelog(res);
+    } catch (err) {
+      cantGetData = true;
+      students = await check_IDB();
+      console.error("Failed fetching changelog: ", err);
+    }
   }
-
-  if (noLocalData && cantGetData) {
+  if (noLastTimeStamp && cantGetData) {
     postMessage({
       status: "error",
       message:
         "Could not find data locally or fetch it. This web app will not work.",
     });
+  } else {
+    prepare_worker(students, options);
   }
 }

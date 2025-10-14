@@ -1,0 +1,1 @@
+export const SEARCH_POINT = "http://localhost:8083"

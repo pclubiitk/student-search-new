@@ -1,9 +1,9 @@
 import { Student } from "@/lib/types/data";
+import { Timestamp } from "next/dist/server/lib/cache-handlers/types";
+import { SEARCH_POINT } from "../constant";
 
-async function fetch_student_data(): Promise<Student[] | null> {
-  const apiUrl = `${process.env.NEXT_PUBLIC_SEARCH_URL}/api/search/`;
-  // TODO: Make this env variable
-  // const apiUrl = "http://localhost:8083/api/search/";
+export async function fetch_student_data(): Promise<Student[] | null> {
+  const apiUrl = `${SEARCH_POINT}/api/search/`;
   try {
     const res = await fetch(apiUrl, {
       credentials: "include",
@@ -34,4 +34,18 @@ async function fetch_student_data(): Promise<Student[] | null> {
   }
 }
 
-export { fetch_student_data };
+export async function fetch_changelog(lastTime: Timestamp) {
+  try {
+    const resp = await fetch(`${SEARCH_POINT}/api/search/changeLog`, {
+      method: "POST",
+      credentials: "include",
+      body: JSON.stringify({
+        lastUpdateTime: new Date(lastTime).toISOString(),
+      }),
+    });
+    return resp.json();
+  } catch (err) {
+    console.error("Failed in fetching changelog err: ", err);
+    return null;
+  }
+}

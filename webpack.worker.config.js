@@ -2,7 +2,7 @@ const path = require("path");
 const webpack = require("webpack");
 
 // Load environment variables from your .env file
-require("dotenv").config({ path: path.resolve(__dirname, ".env") });
+// require("dotenv").config({ path: path.resolve(__dirname, ".env") });
 
 module.exports = {
   mode: "development",
@@ -31,12 +31,12 @@ module.exports = {
       },
     ],
   },
-  plugins: [
-    new webpack.DefinePlugin({
-      // This tells Webpack to find all instances of 'process.env.VARIABLE_NAME' and replace them with the actual value.
-      "process.env.NEXT_PUBLIC_SEARCH_URL": JSON.stringify(
-        process.env.NEXT_PUBLIC_SEARCH_URL
-      ),
-    }),
-  ],
+  // plugins: [
+  //   new webpack.DefinePlugin({
+  //     // This tells Webpack to find all instances of 'process.env.VARIABLE_NAME' and replace them with the actual value.
+  //     "process.env.NEXT_PUBLIC_SEARCH_URL": JSON.stringify(
+  //       process.env.NEXT_PUBLIC_SEARCH_URL
+  //     ),
+  //   }),
+  // ],
 };

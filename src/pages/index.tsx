@@ -72,6 +72,7 @@ export default function Home(props: Object) {
       // Unexpected error
       worker.onerror = (error) => {
         console.error("Error occurred: ", error);
+        errorHandler()
       };
 
       // Initial command to start
