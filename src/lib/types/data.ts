@@ -20,17 +20,15 @@ export interface Query {
   name: string;
   batch: Array<string>;
   hall: Array<string>;
-  prog: Array<string>;
+  course: Array<string>;
   dept: Array<string>;
-  bloodgrp: Array<string>;
   address: string;
 }
 
 export interface Options {
-  //type declaration
+  // Type declaration
   batch: Array<string>;
   hall: Array<string>;
-  prog: Array<string>;
+  course: Array<string>;
   dept: Array<string>;
-  bloodgrp: Array<string>;
 }

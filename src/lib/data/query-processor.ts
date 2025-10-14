@@ -1,4 +1,5 @@
 import { Student, Query } from "@/lib/types/data";
+import Fuse from "fuse.js";
 
 type StudentKey = "gender" | "name" | "hall" | "course" | "dept" | "homeTown";
 
@@ -23,106 +24,69 @@ function check_bacchas(
 }
 
 function check_query(query: Query, students: Student[]): Student[] {
-  //goes through the array of students and selects only those that match the query given.
+  // Goes through the array of students and selects only those that match the query given.
+  // Filtering first on the basis of name (Fuzzy Search)
+  let filtered_student = students; // Currently unfiltered
 
-  return students.filter((student: Student) => {
+  // Applying fuzzy search on the basis of name
+  if (query.name) {
+    console.log("here" , query.name)
+    const fuse = new Fuse(students, {
+      keys: ["name"],
+      threshold: 0.2, // Can change to fine tune later
+    });
+    filtered_student = fuse.search(query.name).map((res) => res.item);
+    // Above only checked fuzziness on name, but user might have entered the roll no which wont be in fuzzy of name, so adding the roll no and username
+
+    const lowercased_name = query.name.toLowerCase();
+    filtered_student = filtered_student.concat(
+      students.filter(
+        (s) =>
+          s.rollNo.toLowerCase().includes(lowercased_name) || // Roll number
+          s.email.toLowerCase().startsWith(lowercased_name) // username
+      )
+    );
+    console.log(filtered_student.length)
+    // Above snippet checks if the students include roll no or starts with username and adds it to the filtered array
+
+    filtered_student = Array.from(new Set(filtered_student)); // Removing duplicates by creating a set and then back to array
+  }
+  return filtered_student.filter((student: Student) => {
+    let key: keyof Query;
     let entry = false;
-    for (const key in query) {
-      const queryKey = key as keyof Query;
-      // the idea here is that if a student DOESN'T satisfy a certain part of the query, we immediately discard them using "return false"
+    for (key in query) {
+      // The idea here is that if a student DOESN'T satisfy a certain part of the query, we immediately discard them using "return false"
       // at the end, we have a "return true" - so any records that make it to the end of the "gauntlet" are added to the final list.
-      const queryValue = query[queryKey];
-      if (Array.isArray(queryValue) && queryValue.length === 0) {
-        //skip any fields that don't have anything in them
-        continue;
-      }
-      if (typeof queryValue === "string" && queryValue.length === 0) {
+      if (query[key].length == 0) {
+        // Skip any fields that don't have anything in them
+        // Skip name key as already taken above
         continue;
       }
       entry = true; //if query is not totally empty, entry is set to true
-      if (queryKey === "name") {
-        // special processing for the "name" field
-        // we can't match the name to the student's username or roll number right now because it could still match their real name - so we can't just immediately put "return false" if it doesn't match, and we can't just put "return true" if it does match because the student may not match the criteria in other fields.
-        // so, we have to check this at the end.
-        // so, we check if the name matches the student's full name first.
-
-        let partsOfQueryName = query.name.toLowerCase().split(/\s+/);
-        let lastPartOfQN: string = partsOfQueryName.pop()!;
-        let partsOfStudentName = student.name.toLowerCase().split(/\s+/);
-        let test1 = true;
-
-        // each part of the name in the query must match to exactly one part of the name of the student, and vice versa
-        // so, we go through each part in partsOfQueryName, and we go through each part in partsOfStudentName - if they match, we remove that part in partsOfStudentName, and we move on
-        // if a part in partsOfQueryName DOESN'T match any part of the student's name, we leave the for loop, and go on to check if the name in the query matches the student's username or roll number
-
-        for (const queryPart of partsOfQueryName) {
-          let test2 = false;
-          for (const studentPart of partsOfStudentName) {
-            if (studentPart === queryPart) {
-              let index = partsOfStudentName.indexOf(studentPart);
-              partsOfStudentName.splice(index, 1);
-              test2 = true; //found a match for this part, so let's exit the loop so we can move onto the next part
-              break;
-            }
-          }
-          if (!test2) {
-            //if we went through the all partsOfStudentName without finding a match, stop checking for these parts and move straight to checking username/roll number.
-            test1 = false;
-            break;
-          }
-        }
-
-        if (test1) {
-          // if test1 is not yet false, this means that all other parts of the name entered have matched with a part in the student's name.
-          // all that's left is to check the final part of the student name - which can be incomplete, so we use startsWith instead of equals.
-          let test2 = false;
-          for (const part of partsOfStudentName) {
-            if (part.startsWith(lastPartOfQN)) {
-              test2 = true;
-              break;
-            }
-          }
-          if (!test2) {
-            test1 = false;
-          }
-        }
-
-        //now that we've checked the name completely, we just need to check if the queried name matches the username/roll number if it hasn't matched the name.
-        if (!test1) {
-          const lowercased_name = query.name.toLowerCase();
-          if (
-            !student.rollNo.includes(lowercased_name) &&
-            !student.email.startsWith(lowercased_name)
-          ) {
-            return false;
-          }
-        } //if the name doesn't match EITHER, then we discard that student's record.
-      } else if (queryKey === "batch") {
+      if (key === "batch") {
         // special processing for the "batch"/"year" field
         if (!query.batch.includes(rollToYear(student.rollNo))) {
           return false;
         }
-      } else if (queryKey === "gender") {
+      } else if (key === "gender") {
         const student_data = student.gender.toLowerCase();
         const query_data = query.gender.toLowerCase();
         if (!(student_data === query_data)) {
           return false;
         }
-      } else if (queryKey === "address") {
+      } else if (key === "address") {
         if (
           !student.homeTown.toLowerCase().includes(query.address.toLowerCase())
-        ) {
+        )
           return false;
-        }
-      } else {
-        //all the other stuff
-        const key0 = queryKey[0] as StudentKey;
-        const studentValue = student[key0 as keyof Student] as string;
-        const queryArray = query[queryKey] as string[];
-        if (!queryArray.includes(studentValue)) {
-          return false;
-        }
       }
+      // TODO: Understand this below filter
+      //  else {
+      //   //all the other stuff
+      //   let key0: Query0 = key[0] as Query0;
+      //   if (!query[key].includes(student[key0])) return false; //note that this allows query[key] to be an array - so, if e.g. query is just {i:[1, 2, 3]} it will return the students with roll numbers 1, 2 and 3 - this helps with finding bacchas
+      //   // note that because typescript is such a stickler for everything, the above trick is no longer possible without making changes. >:/
+      // }
     }
     return entry; //if query is totally empty, this will be false - otherwise it will be true
   });

@@ -17,9 +17,8 @@ let new_students: Student[] | undefined = undefined;
 const options: Options = {
   batch: [],
   hall: [],
-  prog: [],
-  dept: [],
-  bloodgrp: [],
+  course: [],
+  dept: []
 };
 
 self.onmessage = async (event: MessageEvent) => {

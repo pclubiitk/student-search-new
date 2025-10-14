@@ -1,10 +1,20 @@
-import React, {useState, useCallback, useEffect, forwardRef} from "react";
-import {Grid, InputLabel, TextField, Select, MenuItem, Paper, FormControl, InputAdornment, IconButton} from "@mui/material"
-import {ClearRounded} from "@mui/icons-material"
+import React, { useState, useCallback, useEffect, forwardRef } from "react";
+import {
+  Grid,
+  InputLabel,
+  TextField,
+  Select,
+  MenuItem,
+  Paper,
+  FormControl,
+  InputAdornment,
+  IconButton,
+} from "@mui/material";
+import { ClearRounded } from "@mui/icons-material";
 import MultiSelectField from "@/components/student/msf";
 // import {data as listOpts} from "../components/student_data_getter.tsx";
-import debounce from "@/components/ui/animations/debounce"
-import {Query, Options as OptionsType} from "@/lib/types/data"
+import debounce from "@/components/ui/animations/debounce";
+import { Query, Options as OptionsType } from "@/lib/types/data";
 
 /* options to include:
 Year
@@ -25,113 +35,116 @@ rest: text field
 */
 
 interface OptionsProps {
-	sendQuery: Function;
-	listOpts: OptionsType;
-	loading: boolean;
+  sendQuery: Function;
+  listOpts: OptionsType;
+  loading: boolean;
 }
 
+function PreOptions(props: OptionsProps, ref: any) {
+  // 	const [listOpts, setOpts]:[OptionsType, Function]= useState({
+  // 		batch:[],
+  // 		hall:[],
+  // 		prog:[],
+  // 		dept:[],
+  // 		bloodgrp:[]
+  // 	});
 
+  const [query, setQuery]: [Query, Function] = useState({
+    gender: "",
+    name: "",
+    batch: [],
+    hall: [],
+    course: [],
+    dept: [],
+    address: "",
+  });
+  // 	const [test, settest] = useState({name:"", foo:"lol"});
 
-function PreOptions (props: OptionsProps, ref: any) {
-// 	const [listOpts, setOpts]:[OptionsType, Function]= useState({
-// 		batch:[],
-// 		hall:[],
-// 		prog:[],
-// 		dept:[],
-// 		bloodgrp:[]
-// 	});
+  const newsendQuery = useCallback(debounce(props.sendQuery, 300), []);
 
-	const [query, setQuery]:[Query, Function] = useState({
-		gender:"",
-		name:"",
-		batch:[],
-		hall:[],
-		prog:[],
-		dept:[],
-		bloodgrp:[],
-		address:""
-	});
-// 	const [test, settest] = useState({name:"", foo:"lol"});
-	
-	const newsendQuery = useCallback(debounce(props.sendQuery, 300),[]);
-	
-// 	useEffect(() => {
-// // 		console.log("Options.tsx mounted");
-// // 		const searcher = new SharedWorker(new URL("../components/data_worker", import.meta.url));
-// // 		searcher.port.postMessage("Options");
-// // 		searcher.port.onmessage = (e) => {
-// // // 			console.log("Options.tsx got a response");
-// // 			setOpts(e.data);
-// 		};
-// // 		return (() => {
-// // 		console.log("Options.tsx unmounting");
-// // 		searcher.terminate();}); //terminate worker on unmount
-// 	},[]); //on mount: set up shared worker and ask for options
-	// not doing this any more because SharedWorkers don't work on Chrome for android :(
-	
-	useEffect(() => {newsendQuery(query);}, [query]); //execute sendQuery whenever query changes
-	
-	return (
-		<Paper className="options">
-			<Grid container rowSpacing={4} columnSpacing={4} sx={{width:"100%"}}>
-			<Grid item xs={12} sm={6} md={4}>
-				<MultiSelectField 
-					disabled={props.loading} 
-					query={query}
-					name="batch"
-					options={props.listOpts.batch}
-					setQuery={setQuery}
-				/>
-			</Grid>
-			<Grid item xs={12} sm={6} md={4}>
-				<div className="field">
-				<FormControl variant="filled" disabled={props.loading} sx={{width:"100%"}}>
-					<InputLabel id="gender-label">Gender</InputLabel>
-					<Select
-						className="field"
-						labelId="gender-label"
-						value={query.gender}
-						onChange={(event) => {
-							setQuery({...query, gender:event.target.value});
-						}}
-					>
-						<MenuItem value="">Any</MenuItem>
-						<MenuItem value="F">Female</MenuItem>
-						<MenuItem value="M">Male</MenuItem>
-					</Select>
-				</FormControl>
-				</div>
-			</Grid>
-			<Grid item xs={12} sm={6} md={4}>
-				<MultiSelectField 
-					disabled={props.loading} 
-					query={query}
-					name="hall"
-					options={props.listOpts.hall}
-					setQuery={setQuery}
-				/>
-			</Grid>
-			<Grid item xs={12} sm={6} md={4}>
-				<MultiSelectField 
-					disabled={props.loading} 
-					query={query}
-					name="prog"
-					label="Programme"
-					options={props.listOpts.prog}
-					setQuery={setQuery}
-				/>
-			</Grid>
-			<Grid item xs={12} sm={6} md={4}>
-				<MultiSelectField 
-					disabled={props.loading} 
-					query={query}
-					name="dept"
-					label="Department"
-					options={props.listOpts.dept}
-					setQuery={setQuery}
-				/>
-			</Grid>
-			<Grid item xs={12} sm={6} md={4}>
+  // 	useEffect(() => {
+  // // 		console.log("Options.tsx mounted");
+  // // 		const searcher = new SharedWorker(new URL("../components/data_worker", import.meta.url));
+  // // 		searcher.port.postMessage("Options");
+  // // 		searcher.port.onmessage = (e) => {
+  // // // 			console.log("Options.tsx got a response");
+  // // 			setOpts(e.data);
+  // 		};
+  // // 		return (() => {
+  // // 		console.log("Options.tsx unmounting");
+  // // 		searcher.terminate();}); //terminate worker on unmount
+  // 	},[]); //on mount: set up shared worker and ask for options
+  // not doing this any more because SharedWorkers don't work on Chrome for android :(
+
+  useEffect(() => {
+    newsendQuery(query);
+  }, [query]); //execute sendQuery whenever query changes
+
+  return (
+    <Paper className="options">
+      <Grid container rowSpacing={4} columnSpacing={4} sx={{ width: "100%" }}>
+        <Grid item xs={12} sm={6} md={4}>
+          <MultiSelectField
+            disabled={props.loading}
+            query={query}
+            name="batch"
+            options={props.listOpts.batch}
+            setQuery={setQuery}
+          />
+        </Grid>
+        <Grid item xs={12} sm={6} md={4}>
+          <div className="field">
+            <FormControl
+              variant="filled"
+              disabled={props.loading}
+              sx={{ width: "100%" }}
+            >
+              <InputLabel id="gender-label">Gender</InputLabel>
+              <Select
+                className="field"
+                labelId="gender-label"
+                value={query.gender}
+                onChange={(event) => {
+                  setQuery({ ...query, gender: event.target.value });
+                }}
+              >
+                <MenuItem value="">Any</MenuItem>
+                <MenuItem value="F">Female</MenuItem>
+                <MenuItem value="M">Male</MenuItem>
+              </Select>
+            </FormControl>
+          </div>
+        </Grid>
+        <Grid item xs={12} sm={6} md={4}>
+          <MultiSelectField
+            disabled={props.loading}
+            query={query}
+            name="hall"
+            options={props.listOpts.hall}
+            setQuery={setQuery}
+          />
+        </Grid>
+        <Grid item xs={12} sm={6} md={4}>
+          <MultiSelectField
+            disabled={props.loading}
+            query={query}
+            name="course"
+            label="Programme"
+            options={props.listOpts.course}
+            setQuery={setQuery}
+          />
+        </Grid>
+        <Grid item xs={12} sm={6} md={4}>
+          <MultiSelectField
+            disabled={props.loading}
+            query={query}
+            name="dept"
+            label="Department"
+            options={props.listOpts.dept}
+            setQuery={setQuery}
+          />
+        </Grid>
+        {/* <Grid item xs={12} sm={6} md={4}>
 				<MultiSelectField 
 					disabled={props.loading} 
 					query={query}
@@ -140,54 +153,61 @@ function PreOptions (props: OptionsProps, ref: any) {
 					options={props.listOpts.bloodgrp}
 					setQuery={setQuery}
 				/>
-			</Grid>
-			<Grid item xs={12}>
-				<div style={{margin:"auto", width:"fit-content"}}>
-				<FormControl variant="filled" disabled={props.loading}>
-					<TextField
-						disabled={props.loading}
-						className="field home"
-						label="Hometown"
-						value={query.address}
-						onChange={(event) => {
-							setQuery({...query, address:event.target.value});
-// 							newsendQuery(Object.assign(query,{address:event.target.value}));
-						}}
-					/>
-				</FormControl>
-				</div>
-			</Grid>
-			<Grid item xs={12}>
-			<FormControl variant="filled" disabled={props.loading} style={{width:"100%"}}>
-				<TextField
-					disabled={props.loading}
-					className="field main-text"
-					label="Enter name, username or roll no."
-					value={query.name}
-					InputProps={{
-						endAdornment:(<InputAdornment position="end">
-							<IconButton 
-								disabled={query.name.length === 0}
-								onClick={() => {
-									setQuery({...query, name:""});
-// 									newsendQuery({...query, name:""});
-								}}
-							>
-								<ClearRounded />
-							</IconButton>
-						</InputAdornment>),
-					}}
-					onChange={(event) => {
-						setQuery({...query, name:event.target.value});
-// 						newsendQuery({...query, name:event.target.value});
-					}}
-					inputRef={ref}
-					autoFocus
-				/>
-			</FormControl>
-			</Grid>
-			</Grid>
-		</Paper>);
+			</Grid> */}
+        <Grid item xs={12} sm={6} md={4}>
+          <div style={{ margin: "auto", width: "fit-content" }}>
+            <FormControl variant="filled" disabled={props.loading}>
+              <TextField
+                disabled={props.loading}
+                className="field home"
+                label="Hometown"
+                value={query.address}
+                onChange={(event) => {
+                  setQuery({ ...query, address: event.target.value });
+                  // 							newsendQuery(Object.assign(query,{address:event.target.value}));
+                }}
+              />
+            </FormControl>
+          </div>
+        </Grid>
+        <Grid item xs={12}>
+          <FormControl
+            variant="filled"
+            disabled={props.loading}
+            style={{ width: "100%" }}
+          >
+            <TextField
+              disabled={props.loading}
+              className="field main-text"
+              label="Enter name, username or roll no."
+              value={query.name}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      disabled={query.name.length === 0}
+                      onClick={() => {
+                        setQuery({ ...query, name: "" });
+                        // 									newsendQuery({...query, name:""});
+                      }}
+                    >
+                      <ClearRounded />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+              onChange={(event) => {
+                setQuery({ ...query, name: event.target.value });
+                // 						newsendQuery({...query, name:event.target.value});
+              }}
+              inputRef={ref}
+              autoFocus
+            />
+          </FormControl>
+        </Grid>
+      </Grid>
+    </Paper>
+  );
 }
 
 const Options = forwardRef(PreOptions);

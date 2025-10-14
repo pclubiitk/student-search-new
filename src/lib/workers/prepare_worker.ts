@@ -2,8 +2,8 @@ import { Student, Options } from "@/lib/types/data";
 import { rollToYear } from "@/lib/data/query-processor";
 
 function prepare_worker(students: Student[], options: Options): void {
-  //student data should be in a global variable called "students", and there should be a global variable "options" to take the list of options for everything
-  //after filling the "options" variable, send "Worker ready" message and set up onmessage handler
+  // student data should be in a global variable called "students", and there should be a global variable "options" to take the list of options for everything
+  // after filling the "options" variable, send "Worker ready" message and set up onmessage handler
 
   for (const st of students) {
     for (const key in options) {
@@ -14,9 +14,9 @@ function prepare_worker(students: Student[], options: Options): void {
           options.batch.push(year);
         }
       } else {
-        const key0 = optionKey[0] as "hall" | "course" | "dept";
-        if (!options[optionKey].includes(st[key0])) {
-          options[optionKey].push(st[key0]);
+        const key = optionKey as "hall" | "course" | "dept";
+        if (!options[optionKey].includes(st[key])) {
+          options[optionKey].push(st[key]);
         }
       }
     }

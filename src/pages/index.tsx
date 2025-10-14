@@ -29,9 +29,8 @@ export default function Home(props: Object) {
   const [listOpts, setOpts]: [OptType, Function] = useState({
     batch: ["Loading..."],
     hall: ["Loading..."],
-    prog: ["Loading..."],
+    course: ["Loading..."],
     dept: ["Loading..."],
-    bloodgrp: ["Loading..."],
   });
   const [iFrame, setIFrame] = useState(false);
   const searchBar = useRef<HTMLInputElement>(null);
@@ -55,6 +54,7 @@ export default function Home(props: Object) {
         switch (status) {
           case "ready":
             setLoading(false);
+            console.log(options)
             setOpts(options);
             console.log("Worker Ready");
             break;
