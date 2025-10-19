@@ -11,7 +11,6 @@ export async function fetch_student_data(): Promise<Student[] | null> {
 
     if (res.ok) {
       const data = await res.json();
-      console.log("Data received:", data);
       // Your original logic was commented out, let's restore it
       const student_data = data.profiles;
       if (!Array.isArray(student_data)) {

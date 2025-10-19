@@ -2,8 +2,12 @@ import { Student, Options } from "@/lib/types/data";
 import { rollToYear } from "@/lib/data/query-processor";
 
 function prepare_worker(students: Student[], options: Options): void {
-  // student data should be in a global variable called "students", and there should be a global variable "options" to take the list of options for everything
-  // after filling the "options" variable, send "Worker ready" message and set up onmessage handler
+  // Student data should be in a global variable called "students",
+  // and there should be a global variable "options" to take the list
+  // of options for everything
+
+  // After filling the "options" variable, send "Worker ready" message
+  // and set up onmessage handler
 
   for (const st of students) {
     for (const key in options) {
@@ -27,7 +31,7 @@ function prepare_worker(students: Student[], options: Options): void {
     options[optionKey].sort();
   }
 
-  console.log("Worker ready");
+  // console.log("Worker ready");
   postMessage({ status: "ready", options: options }); //when worker processes everything it should send out options headers again
 }
 

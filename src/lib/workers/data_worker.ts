@@ -5,10 +5,10 @@ import {
   update_IDB,
   check_IDB,
   apply_Changelog,
+  delete_IDB,
 } from "@/lib/data/indexeddb-manager";
 import { prepare_worker } from "@/lib/workers/prepare_worker";
 import { check_bacchas, check_query } from "@/lib/data/query-processor";
-import { Timestamp } from "next/dist/server/lib/cache-handlers/types";
 
 let students: Student[] = [];
 let new_students: Student[] | undefined = undefined;
@@ -18,7 +18,7 @@ const options: Options = {
   batch: [],
   hall: [],
   course: [],
-  dept: []
+  dept: [],
 };
 
 self.onmessage = async (event: MessageEvent) => {
@@ -44,11 +44,16 @@ self.onmessage = async (event: MessageEvent) => {
         status: "family_tree_results",
         results: [baapu, student, bacchas],
       });
+      break;
+    case "delete":
+      delete_IDB();
+      break;
     default:
       self.postMessage({
         status: "error",
-        message: `Worker received an unknown command:', ${command}`,
+        message: `Worker received an unknown command: ${command}`,
       });
+      break;
   }
 };
 
@@ -62,10 +67,9 @@ async function initializeData(): Promise<void> {
     console.error("Failed to find last timestamp");
     noLastTimeStamp = true;
   }
-  console.log("time:", Date.now(), time, Date.now() - time);
   if (noLastTimeStamp || Date.now() - time > 1000 * 60 * 60 * 24 * 30) {
     try {
-      console.log("Fetching data from API...");
+      // console.log("Fetching data from API...");
       const res = await fetch_student_data();
       if (res === null) {
         throw new Error("Failed to fetch student data from DB");
@@ -77,14 +81,14 @@ async function initializeData(): Promise<void> {
       cantGetData = true;
     }
     if (new_students !== undefined) {
-      console.log("New data was fetched, so re-preparing worker...");
+      // console.log("New data was fetched, so re-preparing worker...");
       students = new_students;
     } else {
-      console.log("Failed to fetch new data, so worker was not re-prepared.");
+      // console.log("Failed to fetch new data, so worker was not re-prepared.");
     }
   } else {
     try {
-      console.log("Fetching changelog from API...");
+      // console.log("Fetching changelog from API...");
       const res = await fetch_changelog(time);
       if (res === null) {
         throw new Error("Failed to fetch change log");

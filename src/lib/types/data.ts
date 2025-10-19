@@ -12,7 +12,7 @@ export interface Student {
   roomNo: string; //room number
   email: string; //username
   bapu: string; //roll number of baapu/amma
-  bachhas: Array<string> | string; //array containing roll numbers of bacchas (or the words "not available")
+  bachhas: string; //array containing roll numbers of bacchas (or the words "not available")
 }
 
 export interface Query {

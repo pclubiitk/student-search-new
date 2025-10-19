@@ -1,6 +1,6 @@
 import React from "react";
-import SCard from "@/components/ui/SCard";
-import Card from "@mui/material/Card";
+import SCard from "@/components/student/SCard";
+import { Card, CardDescription } from "@/components/ui/card";
 import { Student } from "@/lib/types/data";
 
 interface TreeCardProps {
@@ -17,20 +17,20 @@ function TreeCard(props: TreeCardProps) {
       {props.baapu != undefined ? (
         <SCard
           pointer={true}
-          compact={"ultra"}
+          type={"child"}
           data={props.baapu}
           onClick={() => {
-            //smoothly scroll to top
-            document.getElementsByClassName("MuiModal-root")[0].scrollTo(0, 0);
             props.displayCard(props.baapu);
           }}
         />
       ) : (
-        <Card>Not Available :(</Card>
+        <Card className="p-1">
+          <CardDescription>Not Available :(</CardDescription>
+        </Card>
       )}
       <SCard
         pointer={true}
-        compact={true}
+        type={"self"}
         data={props.data}
         onClick={() => {
           props.displayCard(props.data);
@@ -41,20 +41,15 @@ function TreeCard(props: TreeCardProps) {
           ? props.bacchas.map((el) => (
               <SCard
                 pointer={true}
-                compact={"ultra"}
+                type={"normal"}
                 data={el}
                 key={el.rollNo}
                 onClick={(e) => {
-                  //smoothly scroll to top
-                  document
-                    .getElementsByClassName("MuiModal-root")[0]
-                    .scrollTo(0, 0);
-                  //   let start = null;
-                  //   let scroll = window;
-                  //   window.requestAnimationFrame(function step(currentTime) {
-                  //     if (!start) start = currentTime;
-                  //   });
-                  //   // actually show the card
+                  // Unsure about its use, neither this class exists
+                  // //smoothly scroll to top
+                  // document
+                  //   .getElementsByClassName("MuiModal-root")[0]
+                  //   .scrollTo(0, 0);
                   props.displayCard(el);
                 }}
               />

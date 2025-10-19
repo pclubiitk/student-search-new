@@ -1,5 +1,3 @@
-import Avatar from "@mui/material/Avatar";
-
 import Male from "@/components/assets/GenericMale.png";
 import Female from "@/components/assets/GenericFemale.png";
 
@@ -10,9 +8,6 @@ interface ImageProps {
   gender: string;
   alt: string;
 }
-
-// console.log(Male);
-// console.log(Female);
 
 export default function Image(props: ImageProps) {
   const userName = props.email?.split("@")[0] || "";
@@ -32,7 +27,7 @@ export default function Image(props: ImageProps) {
         width: "150px",
         height: "150px",
         position: "relative",
-        borderRadius: "100%",
+        borderRadius: "5%",
         flexShrink: "0",
         backgroundImage: urls.join(","),
         backgroundPosition: "center top",

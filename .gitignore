@@ -42,3 +42,6 @@ next-env.d.ts
 #scripts
 /family_tree_scripts
 /family_tree_scripts/*
+
+#env
+*.env

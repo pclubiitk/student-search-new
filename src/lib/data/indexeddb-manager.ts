@@ -1,11 +1,13 @@
+// TODO: Update these functions along with more simplified implementation
 import { Student } from "@/lib/types/data";
-import { error } from "console";
 import { Timestamp } from "next/dist/server/lib/cache-handlers/types";
 
-let db: IDBDatabase | undefined = undefined; // holds the reference to the IndexedDB storing student data locally
+// Holds the reference to the IndexedDB storing student data locally
+let db: IDBDatabase | undefined = undefined;
 
-// If the promise resolves, the global variable 'db' contains a reference to the database, otherwise its undefined,
-// earlier it was empty string for some reason.
+// If the promise resolves, the global variable 'db' contains a reference to the database,
+// otherwise its undefined, (earlier it was empty string for some reason).
+
 async function start_IDB(): Promise<void> {
   return new Promise((resolve, reject) => {
     db = undefined;
@@ -36,7 +38,7 @@ async function start_IDB(): Promise<void> {
           //try/catch so that if it isn't there, it doesn't stop the whole thing
           try {
             db!.deleteObjectStore("students");
-            console.log("Deleted old table");
+            // console.log("Deleted old table");
           } catch (err) {
             console.error(
               "Error in deleting students db on version change",
@@ -119,7 +121,7 @@ async function update_IDB(students: Student[]): Promise<void> {
         }
       };
       trxn.oncomplete = () => {
-        //		console.log("Student data successfully saved locally.");
+        // console.log("Student data successfully saved locally.");
         resolve();
       };
       trxn.onerror = (error) => {
@@ -182,7 +184,7 @@ async function apply_Changelog(resp: {
       const store = trxn.objectStore("students");
 
       trxn.oncomplete = () => {
-        console.log("Changelog applied successfully.");
+        // console.log("Changelog applied successfully.");
         resolve(current);
       };
       trxn.onerror = () => {
@@ -216,7 +218,7 @@ async function apply_Changelog(resp: {
         // .put() to overwrite existing entry
         store.put({ students: current, key: 1 });
         store.put({
-          time: new Date(resp.requestTime).getMilliseconds(),
+          time: new Date(resp.requestTime).getTime(),
           key: 2,
         });
       };
@@ -226,4 +228,28 @@ async function apply_Changelog(resp: {
   });
 }
 
-export { start_IDB, get_time_IDB, update_IDB, check_IDB, apply_Changelog };
+function delete_IDB() {
+  const DBDeleteRequest = indexedDB.deleteDatabase("students");
+  DBDeleteRequest.onerror = () => {
+    self.postMessage({
+      status: "delete",
+      message: "Successfully deleted local data",
+    });
+  };
+
+  DBDeleteRequest.onsuccess = () => {
+    self.postMessage({
+      status: "delete",
+      message: "unable to delete local data",
+    });
+  };
+}
+
+export {
+  start_IDB,
+  get_time_IDB,
+  update_IDB,
+  delete_IDB,
+  check_IDB,
+  apply_Changelog,
+};

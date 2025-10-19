@@ -1,55 +1,43 @@
 import React, { useState, useCallback, useEffect, forwardRef } from "react";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
-  Grid,
-  InputLabel,
-  TextField,
   Select,
-  MenuItem,
-  Paper,
-  FormControl,
-  InputAdornment,
-  IconButton,
-} from "@mui/material";
-import { ClearRounded } from "@mui/icons-material";
-import MultiSelectField from "@/components/student/msf";
-// import {data as listOpts} from "../components/student_data_getter.tsx";
-import debounce from "@/components/ui/animations/debounce";
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import MultiSelectField from "@/components/ui/msf"; // Using our refactored MSF
+import { debounce } from "@/lib/utils";
 import { Query, Options as OptionsType } from "@/lib/types/data";
+import { useGContext } from "../ContextProvider";
+import { cn } from "@/lib/utils";
 
-/* options to include:
-Year
-Gender - simple option menu
-Hall
-Programme
-Dept.
-Blood grp.
-Hometown - text
-Name/username/rollno. - text
-Non-text are checkbox option menus
-*/
-
-/*MUI:
-checkbox option menus: checkmark select
-simple option menus: select
-rest: text field
-*/
-
+// NOTE:
+// 1. Earlier cycle of reference was made, the parent component created a ref,
+// // passed it to the PreOptions component, the forwardRef code (show below)
+// // connected it to the parent ref, and in the parent we can focus on it
+// // but this logic is not working as expected, hence removing for now
+//
+// // const Options = forwardRef(PreOptions);
+// // Options.displayName = "SearchOptions";
+//
+// Options was earlier told as PreOptions with one more param ==
+// // ref: React.Ref<HTMLInputElement> (along with the props)
+//
+// // const searchBar = useRef<HTMLInputElement>(null);
+// // This is how the searchBar was initialized and passed
 interface OptionsProps {
-  sendQuery: Function;
+  sendQuery: (query: Query) => void;
   listOpts: OptionsType;
-  loading: boolean;
 }
 
-function PreOptions(props: OptionsProps, ref: any) {
-  // 	const [listOpts, setOpts]:[OptionsType, Function]= useState({
-  // 		batch:[],
-  // 		hall:[],
-  // 		prog:[],
-  // 		dept:[],
-  // 		bloodgrp:[]
-  // 	});
+function Options(props: OptionsProps) {
+  const { isGlobalLoading } = useGContext();
 
-  const [query, setQuery]: [Query, Function] = useState({
+  const [query, setQuery] = useState<Query>({
     gender: "",
     name: "",
     batch: [],
@@ -58,158 +46,125 @@ function PreOptions(props: OptionsProps, ref: any) {
     dept: [],
     address: "",
   });
-  // 	const [test, settest] = useState({name:"", foo:"lol"});
 
-  const newsendQuery = useCallback(debounce(props.sendQuery, 300), []);
-
-  // 	useEffect(() => {
-  // // 		console.log("Options.tsx mounted");
-  // // 		const searcher = new SharedWorker(new URL("../components/data_worker", import.meta.url));
-  // // 		searcher.port.postMessage("Options");
-  // // 		searcher.port.onmessage = (e) => {
-  // // // 			console.log("Options.tsx got a response");
-  // // 			setOpts(e.data);
-  // 		};
-  // // 		return (() => {
-  // // 		console.log("Options.tsx unmounting");
-  // // 		searcher.terminate();}); //terminate worker on unmount
-  // 	},[]); //on mount: set up shared worker and ask for options
-  // not doing this any more because SharedWorkers don't work on Chrome for android :(
+  // Debounced query
+  const debouncedSendQuery = useCallback(debounce(props.sendQuery, 300), [
+    props.sendQuery,
+  ]);
 
   useEffect(() => {
-    newsendQuery(query);
-  }, [query]); //execute sendQuery whenever query changes
+    debouncedSendQuery(query);
+  }, [query, debouncedSendQuery]);
 
   return (
-    <Paper className="options">
-      <Grid container rowSpacing={4} columnSpacing={4} sx={{ width: "100%" }}>
-        <Grid item xs={12} sm={6} md={4}>
-          <MultiSelectField
-            disabled={props.loading}
-            query={query}
-            name="batch"
-            options={props.listOpts.batch}
-            setQuery={setQuery}
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={4}>
-          <div className="field">
-            <FormControl
-              variant="filled"
-              disabled={props.loading}
-              sx={{ width: "100%" }}
+    <Card className="p-4 md:p-6 w-4/5 max-w-4xl m-auto">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* Batch */}
+        <MultiSelectField
+          disabled={isGlobalLoading}
+          query={query}
+          name="batch"
+          options={props.listOpts.batch}
+          setQuery={setQuery}
+        />
+
+        {/* Hall */}
+        <MultiSelectField
+          disabled={isGlobalLoading}
+          query={query}
+          name="hall"
+          options={props.listOpts.hall}
+          setQuery={setQuery}
+        />
+
+        {/* Course */}
+        <MultiSelectField
+          disabled={isGlobalLoading}
+          query={query}
+          name="course"
+          label="Course"
+          options={props.listOpts.course}
+          setQuery={setQuery}
+        />
+
+        {/* Department */}
+        <MultiSelectField
+          disabled={isGlobalLoading}
+          query={query}
+          name="dept"
+          label="Department"
+          options={props.listOpts.dept}
+          setQuery={setQuery}
+        />
+
+        {/* Gender */}
+        <div
+          className={cn(
+            "grid w-full items-center lg:-mt-2",
+            isGlobalLoading && "cursor-not-allowed opacity-50"
+          )}
+        >
+          <div className="w-full">
+            <Label htmlFor="gender" className="mb-1">
+              Gender
+            </Label>
+            <Select
+              value={query.gender}
+              onValueChange={(value) =>
+                // When i select the none option, it clears previous selection
+                setQuery({ ...query, gender: value === "none" ? "" : value })
+              }
+              disabled={isGlobalLoading}
             >
-              <InputLabel id="gender-label">Gender</InputLabel>
-              <Select
-                className="field"
-                labelId="gender-label"
-                value={query.gender}
-                onChange={(event) => {
-                  setQuery({ ...query, gender: event.target.value });
-                }}
-              >
-                <MenuItem value="">Any</MenuItem>
-                <MenuItem value="F">Female</MenuItem>
-                <MenuItem value="M">Male</MenuItem>
-              </Select>
-            </FormControl>
+              <SelectTrigger id="gender">
+                <SelectValue placeholder="Select Gender" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">None</SelectItem>
+                <SelectItem value="F">Female</SelectItem>
+                <SelectItem value="M">Male</SelectItem>
+                <SelectItem value="O">Other</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-        </Grid>
-        <Grid item xs={12} sm={6} md={4}>
-          <MultiSelectField
-            disabled={props.loading}
-            query={query}
-            name="hall"
-            options={props.listOpts.hall}
-            setQuery={setQuery}
+        </div>
+
+        {/* HomeTown */}
+        <div className="grid w-full items-center lg:-mt-2">
+          <Label htmlFor="hometown" className="mb-1">
+            Hometown
+          </Label>
+          <Input
+            id="hometown"
+            type="text"
+            placeholder="e.g., Kanpur"
+            value={query.address}
+            onChange={(e) => setQuery({ ...query, address: e.target.value })}
+            disabled={isGlobalLoading}
           />
-        </Grid>
-        <Grid item xs={12} sm={6} md={4}>
-          <MultiSelectField
-            disabled={props.loading}
-            query={query}
-            name="course"
-            label="Programme"
-            options={props.listOpts.course}
-            setQuery={setQuery}
+        </div>
+      </div>
+
+      {/* Name, roll number, username input bar */}
+      <div>
+        <Label htmlFor="main-search" className="mb-2">
+          Enter name, username or roll no.
+        </Label>
+        <div className="flex flex-row m-0 p-0">
+          <Input
+            id="main-search"
+            type="text"
+            placeholder="Search"
+            value={query.name}
+            onChange={(e) => setQuery({ ...query, name: e.target.value })}
+            disabled={isGlobalLoading}
+            // ref={ref}      // Forward the ref here
+            autoFocus
+            className="pr-10" // Add padding to the right for the clear button
           />
-        </Grid>
-        <Grid item xs={12} sm={6} md={4}>
-          <MultiSelectField
-            disabled={props.loading}
-            query={query}
-            name="dept"
-            label="Department"
-            options={props.listOpts.dept}
-            setQuery={setQuery}
-          />
-        </Grid>
-        {/* <Grid item xs={12} sm={6} md={4}>
-				<MultiSelectField 
-					disabled={props.loading} 
-					query={query}
-					name="bloodgrp"
-					label="Blood group"
-					options={props.listOpts.bloodgrp}
-					setQuery={setQuery}
-				/>
-			</Grid> */}
-        <Grid item xs={12} sm={6} md={4}>
-          <div style={{ margin: "auto", width: "fit-content" }}>
-            <FormControl variant="filled" disabled={props.loading}>
-              <TextField
-                disabled={props.loading}
-                className="field home"
-                label="Hometown"
-                value={query.address}
-                onChange={(event) => {
-                  setQuery({ ...query, address: event.target.value });
-                  // 							newsendQuery(Object.assign(query,{address:event.target.value}));
-                }}
-              />
-            </FormControl>
-          </div>
-        </Grid>
-        <Grid item xs={12}>
-          <FormControl
-            variant="filled"
-            disabled={props.loading}
-            style={{ width: "100%" }}
-          >
-            <TextField
-              disabled={props.loading}
-              className="field main-text"
-              label="Enter name, username or roll no."
-              value={query.name}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      disabled={query.name.length === 0}
-                      onClick={() => {
-                        setQuery({ ...query, name: "" });
-                        // 									newsendQuery({...query, name:""});
-                      }}
-                    >
-                      <ClearRounded />
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-              onChange={(event) => {
-                setQuery({ ...query, name: event.target.value });
-                // 						newsendQuery({...query, name:event.target.value});
-              }}
-              inputRef={ref}
-              autoFocus
-            />
-          </FormControl>
-        </Grid>
-      </Grid>
-    </Paper>
+        </div>
+      </div>
+    </Card>
   );
 }
-
-const Options = forwardRef(PreOptions);
-
 export default Options;
