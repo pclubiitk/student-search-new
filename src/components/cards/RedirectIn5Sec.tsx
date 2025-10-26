@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { LOGIN_POINT } from "@/lib/constant";
 export default function RedirectIn5Sec() {
   const router = useRouter();
   const [timeLeft, setTimeLeft] = useState(5); // State to hold the countdown
@@ -9,7 +10,7 @@ export default function RedirectIn5Sec() {
   useEffect(() => {
     // If timeLeft reaches 0, redirect the user
     if (timeLeft <= 0) {
-      router.replace("https://auth.pclub.in/login");
+      router.replace(LOGIN_POINT);
       setTimeLeft(0);
     }
     const intervalId = setInterval(() => {

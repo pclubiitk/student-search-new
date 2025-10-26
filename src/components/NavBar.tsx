@@ -4,6 +4,7 @@ import { CardDescription, Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Image from "next/image";
+import { PROFILE_POINT } from "@/lib/constant";
 
 // NOTE:
 // 1. At one place have used Showing{"\u00A0"} to add the " " space char.
@@ -55,7 +56,7 @@ export const NavBar = (props: NavBar) => {
           <Info className="h-4 w-4" />
           <span className="sr-only">FAQs</span>
         </Button>
-        <Link href="https://auth.pclub.in/profile">
+        <Link href={PROFILE_POINT}>
           <Button
             variant="secondary"
             size="icon"

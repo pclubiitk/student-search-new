@@ -7,6 +7,7 @@ import FadeAnim from "@/components/ui/animations/fadeAnim";
 import { Student } from "@/lib/types/data";
 import { throttle } from "@/lib/utils";
 import { NavBar } from "./NavBar";
+import { PROFILE_POINT } from "@/lib/constant";
 
 interface DisplayProps {
   toShow: Student[];
@@ -74,10 +75,7 @@ function Display(props: DisplayProps) {
     return (
       <div className="text-center p-8">
         Please make your profile visible to view other profiles.{" "}
-        <a
-          href="https://auth.pclub.in/profile"
-          className="text-blue-600 underline"
-        >
+        <a href={PROFILE_POINT} className="text-blue-600 underline">
           Visit Profile
         </a>
       </div>

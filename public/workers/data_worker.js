@@ -26,7 +26,7 @@ eval("{__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpa
   \*****************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-eval("{__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   SEARCH_POINT: () => (/* binding */ SEARCH_POINT)\n/* harmony export */ });\nvar SEARCH_POINT = \"http://localhost:8083\";\n\n\n//# sourceURL=webpack://student-search-2.0/./src/lib/constant.ts?\n}");
+eval("{__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   LOGIN_POINT: () => (/* binding */ LOGIN_POINT),\n/* harmony export */   PROFILE_POINT: () => (/* binding */ PROFILE_POINT),\n/* harmony export */   SEARCH_POINT: () => (/* binding */ SEARCH_POINT)\n/* harmony export */ });\nvar SEARCH_POINT = \"http://localhost:8083\";\nvar PROFILE_POINT = \"http://localhost:3001/profile\"; // \"https://auth.pclub.in/profile\"\nvar LOGIN_POINT = \"http://localhost:3001/login\"; // \"https://auth.pclub.in/login\"\n\n\n//# sourceURL=webpack://student-search-2.0/./src/lib/constant.ts?\n}");
 
 /***/ }),
 

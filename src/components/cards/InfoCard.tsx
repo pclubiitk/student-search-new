@@ -25,7 +25,7 @@ export function InfoCard() {
         <p>
           Access to student data is restricted to those currently on campus or
           connecting via VPN. You should be logged into your Pclub Account, And
-          to view other profiles, you aer required to keep your profile public
+          to view other profiles, you are required to keep your profile public
         </p>
         <br />
         <CardFooter className="italic">
