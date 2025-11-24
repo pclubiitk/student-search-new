@@ -1,9 +1,8 @@
 import Card from "@mui/material/Card";
 import SCard from "./SCard";
-import React, {useState, useEffect} from "react";
-import {CSSTransition, TransitionGroup} from "react-transition-group";
-import FadeAnim from "./fadeAnim";
-import {Student } from "./commontypes";
+import React, { useState, useEffect } from "react";
+import FadeAnimation from "./utils/FadeAnimation";
+import { Student } from "./types";
 
 /*
 name={el.n}
@@ -66,10 +65,11 @@ function Display(props: DisplayProps) {
 	return (
 		<div>
 			<div id="count"><Card>{students.length} {students.length === 1 ? "result" : "results"} found</Card></div>
-			<FadeAnim myname="display">
-			{students.slice(0,pos)}
-			</FadeAnim>	
-		</div>);
+			<FadeAnimation className="display">
+				{students.slice(0, pos)}
+			</FadeAnimation>	
+		</div>
+	);
 }
 
 export default Display;

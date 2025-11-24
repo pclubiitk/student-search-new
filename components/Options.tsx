@@ -1,10 +1,9 @@
-import React, {useState, useCallback, useEffect, forwardRef} from "react";
-import {Grid, InputLabel, TextField, Select, MenuItem, Paper, FormControl, InputAdornment, IconButton} from "@mui/material"
-import {ClearRounded} from "@mui/icons-material"
+import React, { useState, useCallback, useEffect, forwardRef } from "react";
+import { Grid, InputLabel, TextField, Select, MenuItem, Paper, FormControl, InputAdornment, IconButton } from "@mui/material";
+import { ClearRounded } from "@mui/icons-material";
 import MultiSelectField from "./msf";
-// import {data as listOpts} from "../components/student_data_getter.tsx";
-import debounce from "./debounce"
-import {Student, Query, Options as OptionsType} from "./commontypes"
+import debounce from "./utils/debounce";
+import { Query, Options as OptionsType } from "./types";
 
 /* options to include:
 Year
@@ -41,35 +40,29 @@ function PreOptions (props: OptionsProps, ref: any) {
 // 		bloodgrp:[]
 // 	});
 
-	const [query, setQuery]:[Query, Function] = useState({
-		gender:"",
-		name:"",
-		batch:[],
-		hall:[],
-		prog:[],
-		dept:[],
-		bloodgrp:[],
-		address:""
+	const [query, setQuery] = useState<Query>({
+		gender: "",
+		name: "",
+		batch: [],
+		hall: [],
+		prog: [],
+		dept: [],
+		bloodgrp: [],
+		address: ""
 	});
-// 	const [test, settest] = useState({name:"", foo:"lol"});
+
+	// Create a debounced version of sendQuery that persists across renders
+	const debouncedSendQuery = useCallback(
+		debounce((q: Query) => {
+			props.sendQuery(q);
+		}, 300),
+		[props.sendQuery]
+	);
 	
-	const newsendQuery = useCallback(debounce(props.sendQuery, 300),[]);
-	
-// 	useEffect(() => {
-// // 		console.log("Options.tsx mounted");
-// // 		const searcher = new SharedWorker(new URL("../components/data_worker", import.meta.url));
-// // 		searcher.port.postMessage("Options");
-// // 		searcher.port.onmessage = (e) => {
-// // // 			console.log("Options.tsx got a response");
-// // 			setOpts(e.data);
-// 		};
-// // 		return (() => {
-// // 		console.log("Options.tsx unmounting");
-// // 		searcher.terminate();}); //terminate worker on unmount
-// 	},[]); //on mount: set up shared worker and ask for options
-	// not doing this any more because SharedWorkers don't work on Chrome for android :(
-	
-	useEffect(() => {newsendQuery(query);}, [query]); //execute sendQuery whenever query changes
+	// Execute debounced query whenever query state changes
+	useEffect(() => {
+		debouncedSendQuery(query);
+	}, [query, debouncedSendQuery]);
 	
 	return (
 		<Paper className="options">

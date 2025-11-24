@@ -1,8 +1,13 @@
-// import students from "@/pages/api/data.json";
-import {Student, Query, Options} from  "./commontypes";
+/**
+ * Data Worker Module
+ * Handles fetching, caching, and querying student data from MongoDB and IndexedDB
+ */
 
-var students: any[] = []
-var new_students: any[] | undefined = undefined;
+import { Student, Query, Options } from "./types";
+
+// Global variables for student data management
+let students: Student[] = [];
+let new_students: Student[] | undefined = undefined;
 var config = {
     "APP_ID": "",
     "API_KEY": "",

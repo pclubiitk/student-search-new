@@ -1,13 +1,9 @@
-import React, {useEffect, useState} from "react";
+import React from "react";
 import Card from "@mui/material/Card";
 import Button from "@mui/material/Button";
 import Image from "./UserImage";
-import {Student} from "./commontypes";
-import {EmailRounded, InvertColorsRounded, HomeRounded, AccountBalanceRounded, Public, PeopleOutlineRounded } from "@mui/icons-material";
-//import "styles/SCard.css";
-
-
-//props: data: object with student data
+import { Student } from "./types";
+import { EmailRounded, InvertColorsRounded, HomeRounded, AccountBalanceRounded, Public, PeopleOutlineRounded } from "@mui/icons-material";
 
 interface SCardProps {
 	data: Student;

@@ -1,64 +1,89 @@
 import React from "react";
-import SCard from "../components/SCard";
+import SCard from "./SCard";
 import Card from "@mui/material/Card";
-import { Student } from "./commontypes";
+import { Student } from "./types";
 
+/**
+ * Props for the TreeCard component
+ */
 interface TreeCardProps {
+	/** Parent mentor (baapu/amma) student data */
 	baapu?: Student;
-	bacchas: Array<Student>;
+	/** Array of mentee (baccha) student data */
+	bacchas: Student[];
+	/** Current student data */
 	data: Student;
-	displayCard: Function;
-	clearOverlay?: Function;
+	/** Function to display a student card */
+	displayCard: (student: Student) => void;
+	/** Optional function to clear overlay */
+	clearOverlay?: () => void;
 }
 
+/**
+ * TreeCard Component
+ * 
+ * Displays a student's family tree showing their mentor and mentees.
+ * 
+ * @component
+ */
+
 function TreeCard(props: TreeCardProps) {
+	const { baapu, bacchas, data, displayCard } = props;
+
+	const handleBaapuClick = () => {
+		if (baapu) {
+			// Smoothly scroll to top of modal
+			const modal = document.getElementsByClassName("MuiModal-root")[0];
+			if (modal) {
+				modal.scrollTo(0, 0);
+			}
+			displayCard(baapu);
+		}
+	};
+
 	return (
 		<div className="tree-view">
-			{props.baapu != undefined
-				? <SCard
+			{baapu !== undefined ? (
+				<SCard
 					pointer={true}
 					compact={"ultra"}
-					data={props.baapu}
-					onClick={() => {
-						//smoothly scroll to top
-						document.getElementsByClassName("MuiModal-root")[0].scrollTo(0,0);
-						props.displayCard(props.baapu);
-					}}
+					data={baapu}
+					onClick={handleBaapuClick}
 				/>
-				: <Card>Not Available :(</Card>
-			}
+			) : (
+				<Card>Not Available :(</Card>
+			)}
 			<SCard
 				pointer={true}
 				compact={true}
-				data={props.data}
+				data={data}
 				onClick={() => {
-					props.displayCard(props.data);
+					displayCard(data);
 				}}
 			/>
 			<div className="bacchas">
-				{props.bacchas.length > 0
-					? props.bacchas.map((el) =>
-						<SCard
-							pointer={true}
-							compact={"ultra"}
-							data={el}
-							key={el.i}
-							onClick={(e)=>{
-									//smoothly scroll to top
-									document.getElementsByClassName("MuiModal-root")[0].scrollTo(0,0);
-// 										let start = null;
-// 										let scroll = window
-// 										window.requestAnimationFrame(function step(currentTime) {
-// 											if (!start) start = currentTime;
-// 											
-// 										});
-// 										actually show the card
-									props.displayCard(el);
-								}}
-						/>
-					)
-					: ""
-				}
+				{bacchas.length > 0 ? (
+					bacchas.map((baccha) => {
+						const handleBacchaClick = () => {
+							// Smoothly scroll to top of modal
+							const modal = document.getElementsByClassName("MuiModal-root")[0];
+							if (modal) {
+								modal.scrollTo(0, 0);
+							}
+							displayCard(baccha);
+						};
+
+						return (
+							<SCard
+								pointer={true}
+								compact={"ultra"}
+								data={baccha}
+								key={baccha.i}
+								onClick={handleBacchaClick}
+							/>
+						);
+					})
+				) : null}
 			</div>
 		</div>
 	);

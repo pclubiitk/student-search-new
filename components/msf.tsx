@@ -1,46 +1,62 @@
-import {InputLabel, Select, MenuItem, FormControl} from "@mui/material";
-import React, {useCallback} from "react";
-import debounce from "./debounce";
-import {Query} from "./commontypes";
+import { InputLabel, Select, MenuItem, FormControl, SelectChangeEvent } from "@mui/material";
+import React from "react";
+import { Query } from "./types";
 
+/**
+ * Props for the MultiSelectField component
+ */
 interface MSFProps {
+	/** Current query state */
 	query: Query;
-	setQuery: Function;
+	/** Function to update query state */
+	setQuery: (query: Query) => void;
+	/** Name of the query field this component controls */
 	name: keyof Query;
+	/** Optional custom label (defaults to capitalized field name) */
 	label?: string;
-	options: any[];
+	/** Available options for selection */
+	options: string[];
+	/** Whether the field is disabled */
 	disabled: boolean;
 }
 
+/**
+ * MultiSelectField Component
+ * 
+ * A reusable multi-select dropdown component for filtering options.
+ * 
+ * @component
+ */
 export default function MultiSelectField(props: MSFProps) {
-	let querycopy = props.query; //stops trying to assign values to props.query
+	const { query, setQuery, name, label, options, disabled } = props;
 	
-	const newsetQuery = useCallback(debounce(props.setQuery,1000),[]);
-	
-	
-	return (//idea behind taking "query" from options is to lift state up
-	<div className="field">
-	<FormControl variant="filled" disabled={props.disabled} sx={{width:"100%"}}>
-		<InputLabel id={`${props.name}-label`}>
-		{props.label === undefined 
-		? props.name[0].toUpperCase() + props.name.slice(1,props.name.length).toLowerCase()
-		: props.label}
-		</InputLabel>
-		<Select
-			labelId={`${props.name}-label`}
-			className="field"
-			value={props.query[props.name]}
-			multiple
-			onChange={(event) => {
-				props.setQuery({...querycopy, [props.name]:event.target.value}); //basically just used for object composition - Object.assign returns the composed object
-// 				props.sendQuery({...querycopy, [props.name]:event.target.value});
-			}}
-		>
-			 {props.options.map((el) => (
-				<MenuItem value={el} key={el}>{el}</MenuItem>
-			))}
-		</Select>
-	</FormControl>
-	</div>
+	// Generate label: use provided label or capitalize the field name
+	const displayLabel = label ?? name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
+
+	const handleChange = (event: SelectChangeEvent<string[]>) => {
+		setQuery({ ...query, [name]: event.target.value });
+	};
+
+	return (
+		<div className="field">
+			<FormControl variant="filled" disabled={disabled} sx={{ width: "100%" }}>
+				<InputLabel id={`${name}-label`}>
+					{displayLabel}
+				</InputLabel>
+				<Select
+					labelId={`${name}-label`}
+					className="field"
+					value={query[name] as string[]}
+					multiple
+					onChange={handleChange}
+				>
+					{options.map((option) => (
+						<MenuItem value={option} key={option}>
+							{option}
+						</MenuItem>
+					))}
+				</Select>
+			</FormControl>
+		</div>
 	);
 }

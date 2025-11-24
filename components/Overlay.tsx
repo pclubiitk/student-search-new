@@ -1,58 +1,58 @@
 import Modal from "@mui/material/Modal";
-import React, {useState, useEffect} from "react";
-import FadeAnim from "./fadeAnim";
-import GuestFooter from "./Treefooter";
+import React, { useState, useEffect, ReactNode } from "react";
+import FadeAnimation from "./utils/FadeAnimation";
+
+/**
+ * Props for the Overlay component
+ */
 interface OverlayProps {
-	clearOverlay: Function;
-	children?: any | any[];
+	/** Function to clear/close the overlay */
+	clearOverlay: () => void;
+	/** Content to display in the overlay */
+	children?: ReactNode;
 }
+
+/**
+ * Overlay Component
+ * 
+ * A modal overlay component that displays content with a fade animation.
+ * 
+ * @component
+ */
 
 export default function Overlay(props: OverlayProps) {
 	const [open, setOpen] = useState(false);
-	
-	//if props.children is not an empty string, open the backdrop
+
+	// Open the overlay when children content is provided
 	useEffect(() => {
-		if (props.children !== "") {
+		if (props.children) {
 			setOpen(true);
 		}
 	}, [props.children]);
-	
-	function closeModal() {
+
+	const closeModal = () => {
 		props.clearOverlay();
 		setTimeout(() => {
 			setOpen(false);
 		}, 300);
-	}
-	
-// 	style={{
-// 				display:"flex",
-// 				alignItems:"center",
-// 				justifyContent:"space-evenly",
-// 				overflow:"auto"
-// 			}}
-// 			onClick={() => {
-// 				setOpen(false);
-// 				props.clearOverlay();
-// 			}}
-	
-	return(
+	};
+
+	return (
 		<Modal
 			style={{
-				display:"flex",
-				overflowY:"scroll",
+				display: "flex",
+				overflowY: "scroll",
 				scrollBehavior: "smooth",
 			}}
 			open={open}
 			onClick={closeModal}
 		>
-		<FadeAnim
-			myname="overlay"
-			in={open}
-		>
-		{props.children !== ""
-			? (props.children)
-			:[]}
-		</FadeAnim>
+			<FadeAnimation
+				className="overlay"
+				appear={open}
+			>
+				{props.children || null}
+			</FadeAnimation>
 		</Modal>
 	);
 }
