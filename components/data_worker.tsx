@@ -455,6 +455,50 @@ function check_bacchas(bacchas: "Not Available" | string[]): Student[] {
 }
 
 /**
+ * Checks if a student's name matches the search query
+ * Supports partial word matching and username/roll number search
+ * 
+ * @param {Student} student - Student to check
+ * @param {string} queryName - Search string
+ * @returns {boolean} True if student matches the name query
+ */
+function matchesName(student: Student, queryName: string): boolean {
+	const lowerQueryName = queryName.toLowerCase();
+	const queryParts = lowerQueryName.split(/\s+/);
+	const lastQueryPart = queryParts.pop()!;
+	const studentNameParts = student.n.toLowerCase().split(/\s+/);
+
+	// Try to match all complete word parts
+	let allPartsMatch = true;
+	const remainingStudentParts = [...studentNameParts];
+
+	for (const queryPart of queryParts) {
+		const matchIndex = remainingStudentParts.indexOf(queryPart);
+		if (matchIndex === -1) {
+			allPartsMatch = false;
+			break;
+		}
+		remainingStudentParts.splice(matchIndex, 1);
+	}
+
+	// Check if the last part matches any remaining student name part (prefix match)
+	if (allPartsMatch) {
+		const hasPartialMatch = remainingStudentParts.some(part =>
+			part.startsWith(lastQueryPart)
+		);
+		if (hasPartialMatch) {
+			return true;
+		}
+	}
+
+	// Fallback: check username and roll number
+	return (
+		student.i.toLowerCase().includes(lowerQueryName) ||
+		student.u.toLowerCase().startsWith(lowerQueryName)
+	);
+}
+
+/**
  * Filters students based on search query criteria
  * 
  * Supports multi-field search including:
@@ -487,67 +531,38 @@ function check_query(query: Query): Student[] {
 				if (!matchesName(student, query.name)) {
 					return false;
 				}
-				
-				let partsOfQueryName = query.name.toLowerCase().split(/\s+/);
-				let lastPartOfQN: string = partsOfQueryName.pop()!;
-				let partsOfStudentName = student.n.toLowerCase().split(/\s+/)
-				let test1 = true;
-				
-				// each part of the name in the query must match to exactly one part of the name of the student, and vice versa
-				// so, we go through each part in partsOfQueryName, and we go through each part in partsOfStudentName - if they match, we remove that part in partsOfStudentName, and we move on
-				// if a part in partsOfQueryName DOESN't match any part of the student's name, we leave the for loop, and go on to check if the name in the query matches the student's username or roll number
-				
-				for (const queryPart of partsOfQueryName) {
-					let test2 = false;
-					for (const studentPart of partsOfStudentName) {
-						if (studentPart === queryPart) {
-							let index = partsOfStudentName.indexOf(studentPart);
-							partsOfStudentName.splice(index,1);
-							test2 = true; //found a match for this part, so let's exit the loop so we can move onto the next part
-							break;
-						}
-					}
-					if (!test2) {//if we went through the all partsOfStudentName without finding a match, stop checking for these parts and move straight to checking username/roll number.
-						test1 = false;
-						break;
-					}
+			}
+			// Handle batch/year filtering
+			else if (queryKey === "batch") {
+				if (!query.batch.includes(rollToYear(student.i))) {
+					return false;
 				}
-				
-				if (test1) {
-					// if test1 is not yet false, this means that all other parts of the name entered have matched with a part in the student's name.
-					// all that's left is to check the final part of the student name - which can be incomplete, so we use startsWith instead of equals.
-					let test2 = false;
-					for (const part of partsOfStudentName) {
-						if (part.startsWith(lastPartOfQN)) {
-							test2 = true;
-							break;
-						}
-					}
-					if (!test2) {
-						test1 = false;
-					}
+			}
+			// Handle gender filtering
+			else if (queryKey === "gender") {
+				if (student.g.toLowerCase() !== query.gender.toLowerCase()) {
+					return false;
 				}
-				
-				//now that we've checked the name completely, we just need to check if the queried name matches the username/roll number if it hasn't matched the name.
-				if (!test1) {
-					let lowercased_name = query.name.toLowerCase();
-					if (!(student.i.includes(lowercased_name)) && !(student.u.startsWith(lowercased_name))) return false;
-				} //if the name doesn't match EITHER, then we discard that student's record.
-			} else if (key === "batch") {
-				// special processing for the "batch"/"year" field
-				if (!(query.batch.includes(rollToYear(student.i)))) return false;
-			} else if (key === "gender") {
-				let student_data = student[key[0] as "g"].toLowerCase();
-				let query_data = query[key].toLowerCase();
-				if (!(student_data === query_data)) return false;
-			}else if (key === "address") {
-				if (!(student.a.toLowerCase().includes(query.address.toLowerCase()))) return false;
-			} else { //all the other stuff
-				let key0 : Query0 = key[0] as Query0;
-				if (!(query[key].includes(student[key0]))) return false; //note that this allows query[key] to be an array - so, if e.g. query is just {i:[1, 2, 3]} it will return the students with roll numbers 1, 2 and 3 - this helps with finding bacchas
-				// note that because typescript is such a stickler for everything, the above trick is no longer possible without making changes. >:/
+			}
+			// Handle address/hometown filtering
+			else if (queryKey === "address") {
+				if (!student.a.toLowerCase().includes(query.address.toLowerCase())) {
+					return false;
+				}
+			}
+			// Handle hall, program, department, blood group filtering
+			else {
+				const studentKey = queryKey[0] as StudentPropertyKey;
+				const studentValue = student[studentKey];
+				const queryArray = query[queryKey] as string[];
+
+				if (!queryArray.includes(studentValue)) {
+					return false;
+				}
 			}
 		}
-		return entry; //if query is totally empty, this will be false - otherwise it will be true
+
+		// Return false if query is completely empty
+		return hasNonEmptyCriteria;
 	});
 }
