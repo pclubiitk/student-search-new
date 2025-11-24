@@ -5,40 +5,36 @@ import MultiSelectField from "./msf";
 import debounce from "./utils/debounce";
 import { Query, Options as OptionsType } from "./types";
 
-/* options to include:
-Year
-Gender - simple option menu
-Hall
-Programme
-Dept.
-Blood grp.
-Hometown - text
-Name/username/rollno. - text
-Non-text are checkbox option menus
-*/
-
-/*MUI:
-checkbox option menus: checkmark select
-simple option menus: select
-rest: text field
-*/
-
+/**
+ * Props for the Options component
+ */
 interface OptionsProps {
-	sendQuery: Function;
+	/** Function to send search query to parent component */
+	sendQuery: (query: Query) => void;
+	/** Available filter options populated from student data */
 	listOpts: OptionsType;
+	/** Whether data is currently loading */
 	loading: boolean;
 }
 
-
-
-function PreOptions (props: OptionsProps, ref: any) {
-// 	const [listOpts, setOpts]:[OptionsType, Function]= useState({
-// 		batch:[],
-// 		hall:[],
-// 		prog:[],
-// 		dept:[],
-// 		bloodgrp:[]
-// 	});
+/**
+ * Options Component (Internal)
+ * 
+ * Provides search filters including:
+ * - Batch/Year (multi-select)
+ * - Gender (single select)
+ * - Hall of Residence (multi-select)
+ * - Programme (multi-select)
+ * - Department (multi-select)
+ * - Blood Group (multi-select)
+ * - Hometown (text search)
+ * - Name/Username/Roll Number (text search with autocomplete)
+ * 
+ * Search queries are debounced to reduce unnecessary updates.
+ * 
+ * @component
+ */
+function PreOptions(props: OptionsProps, ref: any) {
 
 	const [query, setQuery] = useState<Query>({
 		gender: "",
@@ -143,8 +139,7 @@ function PreOptions (props: OptionsProps, ref: any) {
 						label="Hometown"
 						value={query.address}
 						onChange={(event) => {
-							setQuery({...query, address:event.target.value});
-// 							newsendQuery(Object.assign(query,{address:event.target.value}));
+							setQuery({ ...query, address: event.target.value });
 						}}
 					/>
 				</FormControl>
@@ -158,21 +153,21 @@ function PreOptions (props: OptionsProps, ref: any) {
 					label="Enter name, username or roll no."
 					value={query.name}
 					InputProps={{
-						endAdornment:(<InputAdornment position="end">
-							<IconButton 
-								disabled={query.name.length === 0}
-								onClick={() => {
-									setQuery({...query, name:""});
-// 									newsendQuery({...query, name:""});
-								}}
-							>
-								<ClearRounded />
-							</IconButton>
-						</InputAdornment>),
+						endAdornment: (
+							<InputAdornment position="end">
+								<IconButton
+									disabled={query.name.length === 0}
+									onClick={() => {
+										setQuery({ ...query, name: "" });
+									}}
+								>
+									<ClearRounded />
+								</IconButton>
+							</InputAdornment>
+						),
 					}}
 					onChange={(event) => {
-						setQuery({...query, name:event.target.value});
-// 						newsendQuery({...query, name:event.target.value});
+						setQuery({ ...query, name: event.target.value });
 					}}
 					inputRef={ref}
 					autoFocus

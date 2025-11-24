@@ -1,75 +1,92 @@
 import Card from "@mui/material/Card";
 import SCard from "./SCard";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import FadeAnimation from "./utils/FadeAnimation";
 import { Student } from "./types";
 
-/*
-name={el.n}
-dept={el.d}
-home={el.a}
-roll={el.i}
-key={el.i}
-*/
+/**
+ * Props for the Display component
+ */
 interface DisplayProps {
+	/** Whether data is currently loading */
 	loading: boolean;
-	toShow: any[];
-	displayCard: Function;
+	/** Array of students to display */
+	toShow: Student[];
+	/** Function to display detailed student card */
+	displayCard: (student: Student) => void;
 }
 
-
+/**
+ * Display Component
+ * 
+ * Shows a list of student cards with infinite scroll functionality.
+ * Renders a loading state while data is being fetched.
+ * 
+ * @component
+ */
 function Display(props: DisplayProps) {
+	const { loading, toShow, displayCard } = props;
 	const [pos, setPos] = useState(50);
-	
-	const students = (typeof props.toShow.map === "function")
-		?props.toShow.map(el => {
-			return (
-				<SCard 
-					data={el} 
-					key={el.i}
-					onClick={() => {props.displayCard(el)}}
+
+	// Memoize student cards to avoid unnecessary re-renders
+	const students = Array.isArray(toShow)
+		? toShow.map((student) => (
+				<SCard
+					data={student}
+					key={student.i}
+					onClick={() => displayCard(student)}
 					pointer={true}
 					compact={true}
 				/>
-		);})
+		  ))
 		: [];
-	
-	const infiniteScrollImplementation = () =>{
-		if (window.innerHeight + document.documentElement.scrollTop > document.documentElement.offsetHeight - 200) {
-			setPos(pos + 50);
+
+	// Handle infinite scroll
+	const infiniteScrollImplementation = useCallback(() => {
+		const { innerHeight } = window;
+		const { scrollTop, offsetHeight } = document.documentElement;
+
+		if (innerHeight + scrollTop > offsetHeight - 200) {
+			setPos((prevPos) => prevPos + 50);
 		}
-	}
-	
-	useEffect(() => { //the infinite scroll part - changes no. elements displayed if scrolled to the end
+	}, []);
+
+	// Set up scroll listener
+	useEffect(() => {
 		window.addEventListener("scroll", infiniteScrollImplementation);
-		return () => {window.removeEventListener("scroll", infiniteScrollImplementation)}
-	});
-	
-	useEffect(() => {setPos(50)},[props.toShow]); //reset pos to 50 if new search (i.e. if new props received)
-	
-// 	if (props.loading) return (
-// 		<FadeAnim myname="display">
-// 		<div className="loader"></div>
-// 		</FadeAnim>
-// 	)
-	
-	if (props.loading) return (
-		<div>
-			<div id="count">
-				<Card>Loading...</Card>
-				<div className="loader"></div>
+		return () => {
+			window.removeEventListener("scroll", infiniteScrollImplementation);
+		};
+	}, [infiniteScrollImplementation]);
+
+	// Reset position when search results change
+	useEffect(() => {
+		setPos(50);
+	}, [toShow]);
+
+	if (loading) {
+		return (
+			<div>
+				<div id="count">
+					<Card>Loading...</Card>
+					<div className="loader"></div>
+				</div>
 			</div>
-		</div>
-	);
-	
+		);
+	}
+
 	return (
 		<div>
-			<div id="count"><Card>{students.length} {students.length === 1 ? "result" : "results"} found</Card></div>
+			<div id="count">
+				<Card>
+					{students.length} {students.length === 1 ? "result" : "results"} found
+				</Card>
+			</div>
 			<FadeAnimation className="display">
 				{students.slice(0, pos)}
-			</FadeAnimation>	
+			</FadeAnimation>
 		</div>
 	);
 }
 
-export default Display;
+export default React.memo(Display);

@@ -1,17 +1,43 @@
-import React from "react";
+import React, { ReactNode, MouseEvent } from "react";
 import Card from "@mui/material/Card";
 import Button from "@mui/material/Button";
 import Image from "./UserImage";
 import { Student } from "./types";
-import { EmailRounded, InvertColorsRounded, HomeRounded, AccountBalanceRounded, Public, PeopleOutlineRounded } from "@mui/icons-material";
+import {
+	EmailRounded,
+	InvertColorsRounded,
+	HomeRounded,
+	AccountBalanceRounded,
+	Public,
+	PeopleOutlineRounded
+} from "@mui/icons-material";
 
+/**
+ * Props for the SCard (Student Card) component
+ */
 interface SCardProps {
+	/** Student data to display */
 	data: Student;
+	/** Whether to show pointer cursor on hover */
 	pointer?: boolean;
+	/** Display mode: false (full), true (compact), or "ultra" (ultra-compact) */
 	compact: boolean | "ultra";
-	onClick?: (event: any) => void;
-	children?: any | any[];
+	/** Click handler for the card */
+	onClick?: (event: MouseEvent) => void;
+	/** Optional child elements (typically buttons for full card view) */
+	children?: ReactNode;
 }
+
+/**
+ * SCard (Student Card) Component
+ * 
+ * Displays student information in three different layouts:
+ * - Full: Complete profile with all details
+ * - Compact: Medium-sized card with basic info
+ * - Ultra-compact: Minimal card for family tree views
+ * 
+ * @component
+ */
 
 const SCard = React.forwardRef((props: SCardProps, ref:any) => {
 	switch (props.compact) {
